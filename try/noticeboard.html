@@ -1,0 +1,84 @@
+<!-- noticeboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Noticeboard | EduDash</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="d-flex" id="wrapper">
+    <div class="bg-primary text-white p-3 min-vh-100" id="sidebar">
+      <h4 class="mb-4">📘 EduDash</h4>
+      <ul class="nav flex-column">
+        <li class="nav-item"><a href="index.html" class="nav-link text-white">🏠 Dashboard</a></li>
+        <li class="nav-item"><a href="students.html" class="nav-link text-white">👨‍🎓 Students</a></li>
+        <li class="nav-item"><a href="events.html" class="nav-link text-white">📅 Events</a></li>
+        <li class="nav-item"><a href="analytics.html" class="nav-link text-white">📊 Analytics</a></li>
+        <li class="nav-item"><a href="noticeboard.html" class="nav-link text-white active">🗒️ Notices</a></li>
+        <li class="nav-item"><a href="payments.html"class="nav-link text-white">💸 Payments</a></li>
+      </ul>
+    </div>
+
+    <div class="container-fluid p-4" id="page-content">
+      <h3 class="mb-4">Noticeboard</h3>
+
+      <!-- Notice Form -->
+      <div class="card shadow-sm p-3 mb-4">
+        <form id="noticeForm" class="row g-3">
+          <div class="col-md-10">
+            <input type="text" class="form-control" id="noticeInput" placeholder="Type a new notice..." required>
+          </div>
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">Post</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Notice List -->
+      <div class="card shadow p-3">
+        <h5>All Notices</h5>
+        <ul id="noticeList" class="list-group list-group-flush mt-2"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const noticeInput = document.getElementById("noticeInput");
+    const noticeList = document.getElementById("noticeList");
+    let notices = JSON.parse(localStorage.getItem("notices")) || [
+      "Semester exam starts next month.",
+      "Library books must be returned before June 25."
+    ];
+
+    function renderNotices() {
+      noticeList.innerHTML = "";
+      notices.forEach((text, index) => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `${text} <button class="btn btn-sm btn-danger" onclick="deleteNotice(${index})">✖</button>`;
+        noticeList.appendChild(li);
+      });
+      localStorage.setItem("notices", JSON.stringify(notices));
+    }
+
+    document.getElementById("noticeForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      notices.unshift(noticeInput.value);
+      noticeInput.value = "";
+      renderNotices();
+    });
+
+    function deleteNotice(index) {
+      if (confirm("Delete this notice?")) {
+        notices.splice(index, 1);
+        renderNotices();
+      }
+    }
+
+    renderNotices();
+  </script>
+</body>
+</html>

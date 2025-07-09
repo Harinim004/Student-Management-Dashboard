@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payments | EduDash</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .btn-custom {
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 10px;
+      padding: 6px 16px;
+      transition: 0.3s ease;
+    }
+
+    .btn-custom:hover {
+      background-color: #0056b3;
+      color: #fff;
+    }
+
+    .badge-paid {
+      background-color: #28a745;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .badge-unpaid {
+      background-color: #dc3545;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <!-- Sidebar -->
+  <div class="bg-primary text-white p-3" id="sidebar">
+    <h4 class="mb-4">📘 EduDash</h4>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="index.html" class="nav-link text-white">🏠 Dashboard</a></li>
+      <li class="nav-item"><a href="students.html" class="nav-link text-white">👨‍🎓 Students</a></li>
+      <li class="nav-item"><a href="events.html" class="nav-link text-white">📅 Events</a></li>
+      <li class="nav-item"><a href="analytics.html" class="nav-link text-white">📊 Analytics</a></li>
+      <li class="nav-item"><a href="noticeboard.html" class="nav-link text-white">🗒️ Notices</a></li>
+      <li class="nav-item"><a href="payments.html" class="nav-link text-white fw-bold bg-white text-primary rounded">💸 Payments</a></li>
+    </ul>
+  </div>
+
+  <!-- Page Content -->
+  <div id="page-content" class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold">💸 Payments</h2>
+      <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#paymentModal">
+        <i class="bi bi-plus-circle"></i> Add Payment
+      </button>
+    </div>
+
+    <div class="mb-3">
+      <button class="btn btn-outline-secondary btn-sm" onclick="filterPayments('all')">All</button>
+      <button class="btn btn-outline-success btn-sm" onclick="filterPayments('paid')">Paid</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="filterPayments('unpaid')">Unpaid</button>
+    </div>
+
+    <div class="card p-3">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th>
+              <th>Reg No</th>
+              <th>Department</th>
+              <th>Amount (₹)</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="paymentTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" onsubmit="savePayment(event)">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Add/Edit Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editIndex">
+        <div class="mb-3">
+          <label>Name</label>
+          <input type="text" id="payName" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label>Reg No</label>
+          <input type="text" id="payReg" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label>Department</label>
+          <input type="text" id="payDept" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label>Amount</label>
+          <input type="number" id="payAmount" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label>Status</label>
+          <select id="payStatus" class="form-select">
+            <option value="true">Paid</option>
+            <option value="false">Unpaid</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" type="submit">Save</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let payments = JSON.parse(localStorage.getItem("students")) || [];
+
+  function renderPayments(filter = "all") {
+    const table = document.getElementById("paymentTable");
+    table.innerHTML = "";
+
+    const filtered = payments.filter(p => {
+      if (filter === "paid") return p.paid;
+      if (filter === "unpaid") return !p.paid;
+      return true;
+    });
+
+    filtered.forEach((p, i) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.reg}</td>
+        <td>${p.dept}</td>
+        <td>₹${p.amount || 0}</td>
+        <td><span class="badge ${p.paid ? "badge-paid" : "badge-unpaid"}">${p.paid ? "Paid" : "Unpaid"}</span></td>
+        <td>
+          <button class="btn btn-sm btn-warning me-1" onclick="editPayment(${i})"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="deletePayment(${i})"><i class="bi bi-trash"></i></button>
+        </td>`;
+      table.appendChild(row);
+    });
+  }
+
+  function filterPayments(type) {
+    renderPayments(type);
+  }
+
+  function savePayment(e) {
+    e.preventDefault();
+    const index = document.getElementById("editIndex").value;
+    const newPayment = {
+      name: document.getElementById("payName").value,
+      reg: document.getElementById("payReg").value,
+      dept: document.getElementById("payDept").value,
+      amount: parseInt(document.getElementById("payAmount").value),
+      paid: document.getElementById("payStatus").value === "true"
+    };
+
+    if (index === "") {
+      payments.push(newPayment);
+    } else {
+      payments[index] = newPayment;
+    }
+
+    localStorage.setItem("students", JSON.stringify(payments));
+    document.getElementById("paymentModal").querySelector("form").reset();
+    bootstrap.Modal.getInstance(document.getElementById("paymentModal")).hide();
+    renderPayments();
+  }
+
+  function editPayment(i) {
+    const p = payments[i];
+    document.getElementById("editIndex").value = i;
+    document.getElementById("payName").value = p.name;
+    document.getElementById("payReg").value = p.reg;
+    document.getElementById("payDept").value = p.dept;
+    document.getElementById("payAmount").value = p.amount;
+    document.getElementById("payStatus").value = p.paid;
+    new bootstrap.Modal(document.getElementById("paymentModal")).show();
+  }
+
+  function deletePayment(i) {
+    if (confirm("Are you sure you want to delete this record?")) {
+      payments.splice(i, 1);
+      localStorage.setItem("students", JSON.stringify(payments));
+      renderPayments();
+    }
+  }
+
+  renderPayments();
+</script>
+</body>
+</html>
